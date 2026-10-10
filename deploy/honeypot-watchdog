@@ -1,0 +1,19 @@
+#!/bin/sh
+# sshhoney 看门狗：探活 banner，无响应自动重启并取证（fd 数量/上限）
+# 安装: cp honeypot-watchdog /etc/periodic/15min/ && chmod +x ...   (Alpine cron)
+#   或 crontab 加: */5 * * * * /opt/sshhoney/honeypot-watchdog
+#
+# 说明：每 5 分钟向 127.0.0.1:22 发一次空连接读 banner；
+# 读不到 "SSH-" 前缀即认为蜜罐挂死，自动重启并留证。
+
+PORT="${1:-22}"
+BANNER=$(echo "" | nc -w 4 127.0.0.1 "$PORT" 2>/dev/null | head -c 4)
+if [ "$BANNER" != "SSH-" ]; then
+    PID=$(pgrep -f 'sshhoney[ ]-listen' | head -1)
+    FD=$(ls /proc/$PID/fd 2>/dev/null | wc -l)
+    NOFILE=$(grep -i 'open files' /proc/$PID/limits 2>/dev/null | awk '{print $4}')
+    rc-service sshhoney restart >/dev/null 2>&1 || systemctl restart sshhoney >/dev/null 2>&1
+    sleep 3
+    B2=$(echo "" | nc -w 4 127.0.0.1 "$PORT" 2>/dev/null | head -c 4)
+    logger -t sshhoney-watchdog "unresponsive (banner='$BANNER' pid=$PID fd=$FD nofile=$NOFILE), restarted, verify='$B2'"
+fi

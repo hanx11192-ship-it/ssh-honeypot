@@ -1,0 +1,14 @@
+#!/bin/sh
+# sshhoney 日志轮转：>4MB 时 copytruncate，保留 1 个历史
+# Alpine: 放 /etc/periodic/15min/ ；或 crontab 每 15 分钟执行一次
+
+for LOG in /var/log/sshhoney/activity.jsonl /var/log/sshhoney/daemon.log; do
+    [ -f "$LOG" ] || continue
+    SIZE=$(stat -c%s "$LOG" 2>/dev/null || echo 0)
+    if [ "$SIZE" -gt 4194304 ]; then
+        cp "$LOG" "$LOG.1"
+        truncate -s 0 "$LOG"
+        chown honeypot:honeypot "$LOG" 2>/dev/null
+        logger -t sshhoney-logrotate "rotated: $LOG ($SIZE bytes)"
+    fi
+done

@@ -1,0 +1,24 @@
+# systemd 服务单元 (Debian / Ubuntu / CentOS ...)
+# 安装: cp sshhoney.service /etc/systemd/system/
+#       systemctl daemon-reload && systemctl enable --now sshhoney
+
+[Unit]
+Description=sshhoney - low-dependency SSH honeypot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=honeypot
+Group=honeypot
+ExecStart=/opt/sshhoney/sshhoney -listen :22 -hostkey /opt/sshhoney/keys/host_ed25519_key -log /var/log/sshhoney/activity.jsonl -version SSH-2.0-OpenSSH_9.7
+Restart=always
+RestartSec=5
+# 加固
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log/sshhoney
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+#!/sbin/openrc-run
+# OpenRC 服务单元 (Alpine Linux / Gentoo)
+# 安装: cp sshhoney-openrc /etc/init.d/sshhoney && chmod +x /etc/init.d/sshhoney
+#       rc-update add sshhoney default && rc-service sshhoney start
+
+description="sshhoney - low-dependency SSH honeypot"
+
+supervisor=supervise-daemon
+command="/opt/sshhoney/sshhoney"
+command_args="-listen :22 -hostkey /opt/sshhoney/keys/host_ed25519_key -log /var/log/sshhoney/activity.jsonl -version SSH-2.0-OpenSSH_9.7"
+command_user="honeypot"
+output_log="/var/log/sshhoney/daemon.log"
+error_log="/var/log/sshhoney/daemon.log"
+respawn_delay=5
+respawn_max=0
+
+depend() {
+	after net firewall
+}
