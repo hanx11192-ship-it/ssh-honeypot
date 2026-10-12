@@ -4,6 +4,8 @@
 
 > **为什么造这个轮子**：作者在生产环境使用 [jaksi/sshesame](https://github.com/jaksi/sshesame) 时，遇到两次「进程存活但停止 accept」的卡死（疑似与 tcpip_services 假端口转发相关），上游 v0.0.39（2024-08）后已停更无修复。于是自研了一个**在结构上不可能挂死**的替代品，日志格式与 sshesame 完全兼容，可以无缝替换。
 
+📖 **[64 小时生产运行报告（REPORT.md）](REPORT.md)** — 288 个攻击源 IP 画像、两个恶意软件家族完整 TTP、稳定性对比与实战踩坑。
+
 ## 特性
 
 | 特性 | 说明 |
@@ -124,15 +126,15 @@ grep shell_input /var/log/sshhoney/activity.jsonl                # shell 交互�
 互联网 ──► 22 端口
             ├─ 每 IP 每 24h 前 3 次连接 ──► 喂给蜜罐（收集账密 + 登录后行为）
             └─ 第 4 次起 ──────────────► iptables DROP（xt_recent 记忆 24h）
-互联网 ──► 233 端口 ──► 真实 sshd（你自己用）
+互联网 ──► 10026 端口 ──► 真实 sshd（你自己用）
 ```
 
 ```bash
 # 扩大黑名单容量（内核默认只有 100 条，满后 FIFO 挤出）
 echo "options xt_recent ip_list_tot=5000 ip_pkt_list_tot=50" > /etc/modprobe.d/xt_recent.conf
 
-# 部署混合规则（前提：真实 sshd 已监听 233 并测试可登录！）
-./deploy/iptables-hybrid.sh 22 233
+# 部署混合规则（前提：真实 sshd 已监听 10026 并测试可登录！）
+./deploy/iptables-hybrid.sh 22 10026
 ```
 
 配套运维脚本（见 `deploy/`）：
