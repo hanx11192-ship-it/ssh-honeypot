@@ -133,8 +133,8 @@ grep shell_input /var/log/sshhoney/activity.jsonl                # shell 交互�
 # 扩大黑名单容量（内核默认只有 100 条，满后 FIFO 挤出）
 echo "options xt_recent ip_list_tot=5000 ip_pkt_list_tot=50" > /etc/modprobe.d/xt_recent.conf
 
-# 部署混合规则（前提：真实 sshd 已监听 10026 并测试可登录！）
-./deploy/iptables-hybrid.sh 22 10026
+# 部署混合规则（前提：真实 sshd 已监听 233并测试可登录！）
+./deploy/iptables-hybrid.sh 22 233
 ```
 
 配套运维脚本（见 `deploy/`）：
