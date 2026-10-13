@@ -126,7 +126,7 @@ grep shell_input /var/log/sshhoney/activity.jsonl                # shell 交互�
 互联网 ──► 22 端口
             ├─ 每 IP 每 24h 前 3 次连接 ──► 喂给蜜罐（收集账密 + 登录后行为）
             └─ 第 4 次起 ──────────────► iptables DROP（xt_recent 记忆 24h）
-互联网 ──► 10026 端口 ──► 真实 sshd（你自己用）
+互联网 ──► 233 端口 ──► 真实 sshd（你自己用）
 ```
 
 ```bash
